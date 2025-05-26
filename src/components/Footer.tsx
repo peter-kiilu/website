@@ -18,7 +18,7 @@ export default function Footer() {
              <div className="w-9 h-9 bg-white rounded-full flex items-center justify-center">
               <span className="text-primary-DEFAULT font-bold text-sm">RC</span>
               </div>
-             <h1 className="text-lg md:text-xl font-bold text-black">RC-YIC</h1>
+             <h1 className="text-lg md:text-xl font-bold text-white">RC-YIC</h1>
             </Link>
             </div>
             <p className="text-white">
@@ -30,10 +30,10 @@ export default function Footer() {
           <div>
             <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
             <ul className="space-y-2">
-              <li><Link to="/" className="text-black hover:text-white transition">Home</Link></li>
-              <li><Link to="/about" className="text-black hover:text-white transition">About</Link></li>
-              <li><Link to="/blog" className="text-black hover:text-white transition">Blog</Link></li>
-              <li><Link to="/activities" className="text-black hover:text-white transition">Activities</Link></li>
+              <li><Link to="/" className="text-white hover:text-black transition">Home</Link></li>
+              <li><Link to="/about" className="text-white hover:text-black transition">About</Link></li>
+              <li><Link to="/blog" className="text-white hover:text-black transition">Blog</Link></li>
+              <li><Link to="/activities" className="text-white hover:text-black transition">Activities</Link></li>
             </ul>
           </div>
           
@@ -74,7 +74,7 @@ export default function Footer() {
               <h5 className="font-medium mb-2">Contact Email</h5>
               <a 
                 href="mailto:contact@rcyic.edu" 
-                className="text-black hover:text-white transition-colors"
+                className="text-white hover:text-black transition-colors"
               >
                 contact@rcyic.edu
               </a>
