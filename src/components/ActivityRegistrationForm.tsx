@@ -28,7 +28,7 @@ const ActivityRegistrationForm = ({ activityId }: { activityId: string }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // In a real app, you would call your API here
+      // call API's here
       console.log('Registering for activity:', activityId, formData);
       alert('Registration successful!');
       setFormData({

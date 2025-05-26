@@ -66,12 +66,8 @@ export default function Activities() {
               className={`px-4 py-2 rounded-full text-sm font-medium ${filter === 'past' ? 'bg-gray-700 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
             >
               Past
-            </button>
-              <Link to="/activities/suggest" className="btn-secondary">
-              Join an Activity
-              </Link>
-          </div>
-          
+            </button>              
+          </div>              
           <button 
             onClick={() => setShowForm(!showForm)}
             className="flex items-center bg-gray-700 text-white px-4 py-2 rounded-full hover:bg-secondary-dark transition-colors"
@@ -125,10 +121,10 @@ export default function Activities() {
                     </div>
                   </div>
                   
-                  {activity.status === 'upcoming' && (
-                    <button className="mt-4 w-full bg-gray-700 text-white py-2 rounded hover:bg-primary-dark transition-colors">
-                      Register
-                    </button>
+                  {activity.status === 'upcoming' && (                   
+                  <Link to="/activities/suggest" className="btn-secondary">
+                    Attend
+                  </Link>
                   )}
                 </div>
               </div>

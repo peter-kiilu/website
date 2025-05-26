@@ -6,27 +6,39 @@ const Home = () => {
     {
       id: 1,
       title: "Ethical AI Workshop",
-      date: "2023-06-15",
-      excerpt: "Learn about ethical considerations in AI development"
-    },
-    {
-      id: 1,
-      title: "Ethical AI Workshop",
-      date: "2023-06-15",
-      excerpt: "Learn about ethical considerations in AI development"
-    },
-    {
-      id: 1,
-      title: "Ethical AI Workshop",
-      date: "2023-06-15",
-      excerpt: "Learn about ethical considerations in AI development"
+      date: "2025-06-15",
+      excerpt: "Join us for an in-depth workshop exploring the ethical dilemmas surrounding artificial intelligence. We'll discuss bias in algorithms, transparency, accountability, and how to ensure AI is developed and deployed responsibly in society."
     },
     {
       id: 2,
       title: "Sustainable Coding",
-      date: "2023-06-22",
-      excerpt: "Techniques for energy-efficient programming"
-    }
+      date: "2025-06-22",
+      excerpt: "Discover practical strategies to write code that’s not only efficient but also eco-friendly. This session covers energy-aware algorithms, sustainable software engineering principles, and tools that help measure your app’s environmental footprint."
+    },
+    {
+      id: 3,
+      title: "Digital Privacy and You",
+      date: "2025-06-28",
+      excerpt: "In a world where data is constantly collected, learn how to protect your digital identity. This event will cover privacy-first design, encryption basics, and how to advocate for ethical data use in tech development."
+    },
+    {
+      id: 4,
+      title: "Hack for Impact: Mini Hackathon",
+      date: "2025-07-03",
+      excerpt: "Put your skills to the test in a 12-hour hackathon focused on solving real-world challenges in education, health, and community development. Open to all experience levels with mentorship available throughout the event."
+    },
+    {
+      id: 5,
+      title: "Open Source for Social Good",
+      date: "2025-07-10",
+      excerpt: "Get involved in open source projects that drive positive change. Learn how to contribute, collaborate, and make your code count for causes like climate action, accessibility, and equitable tech access."
+    },
+    {
+    id: 6,
+    title: "Future of Work: Tech Careers Panel",
+    date: "2025-07-17",
+    excerpt: "Explore how automation, remote work, and emerging technologies are reshaping the job market. Hear from industry professionals about career paths in tech, skills that will matter most, and how to future-proof your career in a fast-changing world."
+   }
   ];
 
   return (
