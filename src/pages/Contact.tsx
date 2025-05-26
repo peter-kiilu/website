@@ -114,7 +114,7 @@ const Contact = () => {
               </div>
               <div>
                 <h3 className="font-semibold text-lg mb-1">Phone</h3>
-                <p className="text-gray-600">+1 (555) 123-4567</p>
+                <p className="text-gray-600">+254 719 443 774</p>
                 <p className="text-gray-600">Mon-Fri, 9am-5pm</p>
               </div>
             </div>
@@ -125,10 +125,10 @@ const Contact = () => {
               </div>
               <div>
                 <h3 className="font-semibold text-lg mb-1">Location</h3>
-                <p className="text-gray-600">Computer Science Department</p>
-                <p className="text-gray-600">University Main Campus</p>
-                <p className="text-gray-600">123 College Avenue</p>
-                <p className="text-gray-600">City, State 12345</p>
+                <p className="text-gray-600">Communication & Information Techology Department</p>
+                <p className="text-gray-600">University of Embu Campus</p>
+                <p className="text-gray-600">6-60100, Embu</p>
+                <p className="text-gray-600">Embu, Nairobi Meru Highway</p>
               </div>
             </div>
           </div>

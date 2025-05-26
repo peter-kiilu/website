@@ -15,7 +15,7 @@ const ActivityDetail = () => {
     location: "Computer Science Building, Room 101",
     capacity: 50,
     registered: 32,
-    organizer: "Dr. Sarah Chen",
+    organizer: "Dr. Faith Sarai",
     requirements: "Basic programming knowledge. Teams of 3-5 students.",
     points: 100
   };
