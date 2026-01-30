@@ -6,9 +6,21 @@ from app.api import users
 app = FastAPI(title=settings.PROJECT_NAME)
 
 # CORS
+origins = [
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "https://young-innovators.vercel.app", # Placeholder for potential Vercel URL
+]
+
+# Allow any domain if FRONTEND_URL is set (Render/Vercel)
+import os
+frontend_url = os.getenv("FRONTEND_URL")
+if frontend_url:
+    origins.append(frontend_url)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Update this with frontend URL in production
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
