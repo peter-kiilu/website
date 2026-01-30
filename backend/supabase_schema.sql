@@ -7,6 +7,12 @@ create table public.users (
   student_id text,
   department text,
   points int default 0,
+  role text default 'student' check (role in ('student', 'mentor', 'staff')),
+  bio text,
+  expertise text,
+  availability text,
+  is_verified boolean default false,
+  verification_token text,
   joined_at timestamptz default now()
 );
 

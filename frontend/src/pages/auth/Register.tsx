@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { api } from '../../lib/api';
-import { User, Mail, Lock, Hash, Book, ArrowRight, UserPlus, Sparkles, GraduationCap } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { signInWithGoogle } from '../../lib/supabase';
+import { User, Mail, Lock, Hash, Book, ArrowRight, UserPlus, Sparkles, GraduationCap, Briefcase, Check, X, Eye, EyeOff, FileText, Clock } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../../components/ui/Button';
+
 
 export default function Register() {
   const navigate = useNavigate();
@@ -12,14 +14,63 @@ export default function Register() {
     email: '',
     password: '',
     student_id: '',
-    department: 'Computer Science'
+    department: 'Computer Science',
+    year_of_study: '1',
+    role: 'student' as 'student' | 'mentor' | 'staff',
+    bio: '',
+    expertise: '',
+    availability: ''
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  // Password strength validation
+  const passwordChecks = useMemo(() => ({
+    length: formData.password.length >= 8,
+    uppercase: /[A-Z]/.test(formData.password),
+    lowercase: /[a-z]/.test(formData.password),
+    digit: /\d/.test(formData.password),
+    special: /[!@#$%^&*(),.?":{}|<>]/.test(formData.password),
+  }), [formData.password]);
+
+  const passwordStrength = Object.values(passwordChecks).filter(Boolean).length;
+  const isPasswordValid = passwordStrength === 5;
+
+  // Email validation based on role
+  const emailError = useMemo(() => {
+    if (!formData.email || formData.email.length < 5) return null;
+    
+    // Only validate if email looks complete (has @ and something after)
+    if (!formData.email.includes('@') || formData.email.endsWith('@')) return null;
+    
+    const isAcKeEmail = formData.email.toLowerCase().endsWith('.ac.ke');
+    const isGmailEmail = formData.email.toLowerCase().includes('@gmail.com');
+    
+    if (formData.role === 'student' && !isAcKeEmail) {
+      return 'Students must use email ending with .ac.ke';
+    }
+    if ((formData.role === 'mentor' || formData.role === 'staff') && !isAcKeEmail && !isGmailEmail) {
+      return 'Use .ac.ke or @gmail.com email';
+    }
+    return null;
+  }, [formData.email, formData.role]);
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    
+    if (!isPasswordValid) {
+      setError('Please meet all password requirements');
+      return;
+    }
+    
+    if (emailError) {
+      setError(emailError);
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -34,7 +85,7 @@ export default function Register() {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -104,15 +155,37 @@ export default function Register() {
                 <p className="text-muted-foreground">Join our ecosystem of innovators</p>
               </div>
 
+              {/* Role Selection */}
+              <div className="flex gap-3">
+                {[
+                  { value: 'student', label: 'Student', icon: GraduationCap },
+                  { value: 'mentor', label: 'Mentor/Staff', icon: Briefcase }
+                ].map((role) => (
+                  <button
+                    key={role.value}
+                    type="button"
+                    onClick={() => setFormData({ ...formData, role: role.value as any })}
+                    className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl border transition-all ${
+                      formData.role === role.value || (role.value === 'mentor' && formData.role === 'staff')
+                        ? 'bg-primary/10 border-primary text-primary' 
+                        : 'bg-white/5 border-white/10 text-muted-foreground hover:border-white/20'
+                    }`}
+                  >
+                    <role.icon size={18} />
+                    <span className="font-bold text-sm">{role.label}</span>
+                  </button>
+                ))}
+              </div>
+
               {error && (
                 <div className="bg-red-500/10 border border-red-500/20 text-red-500 px-4 py-3 rounded-xl text-sm font-medium">
                   {error}
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="space-y-8">
+              <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Personal Section */}
-                <div className="space-y-5">
+                <div className="space-y-4">
                   <div className="relative">
                     <User className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/40" size={18} />
                     <input
@@ -132,28 +205,87 @@ export default function Register() {
                       type="email"
                       required
                       onChange={handleChange}
-                      className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-6 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
-                      placeholder="University Email"
+                      className={`w-full bg-white/5 border rounded-2xl py-4 pl-12 pr-6 focus:ring-2 focus:ring-primary/20 transition-all outline-none ${
+                        emailError ? 'border-red-500/50 focus:border-red-500' : 'border-white/10 focus:border-primary'
+                      }`}
+                      placeholder={formData.role === 'student' ? 'yourname@university.ac.ke' : 'yourname@gmail.com'}
                     />
+                    {emailError && (
+                      <p className="text-red-500 text-xs mt-1 ml-1">{emailError}</p>
+                    )}
                   </div>
 
-                  <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/40" size={18} />
-                    <input
-                      name="password"
-                      type="password"
-                      required
-                      onChange={handleChange}
-                      className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-6 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
-                      placeholder="Create Password"
-                    />
+                  {/* Password with strength indicator */}
+                  <div className="space-y-3">
+                    <div className="relative">
+                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/40" size={18} />
+                      <input
+                        name="password"
+                        type={showPassword ? 'text' : 'password'}
+                        required
+                        onChange={handleChange}
+                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-12 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
+                        placeholder="Create Password"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      >
+                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
+
+                    {/* Password strength bar */}
+                    <div className="flex gap-1">
+                      {[1, 2, 3, 4, 5].map((level) => (
+                        <div
+                          key={level}
+                          className={`h-1 flex-1 rounded-full transition-colors ${
+                            passwordStrength >= level
+                              ? level <= 2 ? 'bg-red-500' : level <= 4 ? 'bg-yellow-500' : 'bg-emerald-500'
+                              : 'bg-white/10'
+                          }`}
+                        />
+                      ))}
+                    </div>
+
+                    {/* Password requirements */}
+                    <AnimatePresence>
+                      {formData.password && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="grid grid-cols-2 gap-2 text-xs"
+                        >
+                          {[
+                            { key: 'length', label: '8+ characters' },
+                            { key: 'uppercase', label: 'Uppercase letter' },
+                            { key: 'lowercase', label: 'Lowercase letter' },
+                            { key: 'digit', label: 'Number' },
+                            { key: 'special', label: 'Special character' },
+                          ].map((check) => (
+                            <div
+                              key={check.key}
+                              className={`flex items-center gap-1 ${
+                                passwordChecks[check.key as keyof typeof passwordChecks] ? 'text-emerald-500' : 'text-muted-foreground'
+                              }`}
+                            >
+                              {passwordChecks[check.key as keyof typeof passwordChecks] ? <Check size={12} /> : <X size={12} />}
+                              <span>{check.label}</span>
+                            </div>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </div>
 
                 <div className="h-px bg-white/5" />
 
                 {/* Academic Section */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="relative">
                     <Hash className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/40" size={18} />
                     <input
@@ -162,7 +294,7 @@ export default function Register() {
                       required
                       onChange={handleChange}
                       className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-6 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
-                      placeholder="Student Registration No"
+                      placeholder={formData.role === 'student' ? 'Registration No' : 'Staff ID'}
                     />
                   </div>
 
@@ -180,12 +312,81 @@ export default function Register() {
                       ))}
                     </select>
                   </div>
+
+                  {formData.role === 'student' && (
+                    <div className="relative">
+                      <GraduationCap className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/40" size={18} />
+                      <select
+                        name="year_of_study"
+                        required
+                        value={formData.year_of_study}
+                        onChange={handleChange}
+                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-6 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none appearance-none"
+                      >
+                        <option value="1" className="bg-background">1st Year</option>
+                        <option value="2" className="bg-background">2nd Year</option>
+                        <option value="3" className="bg-background">3rd Year</option>
+                        <option value="4" className="bg-background">4th Year</option>
+                        <option value="5" className="bg-background">5th Year+</option>
+                      </select>
+                    </div>
+                  )}
                 </div>
+
+                {/* Mentor-specific fields */}
+                <AnimatePresence>
+                  {(formData.role === 'mentor' || formData.role === 'staff') && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="space-y-4 overflow-hidden"
+                    >
+                      <div className="h-px bg-white/5" />
+                      <p className="text-xs text-primary font-bold uppercase tracking-widest">Mentor Profile</p>
+                      
+                      <div className="relative">
+                        <FileText className="absolute left-4 top-4 text-primary/40" size={18} />
+                        <textarea
+                          name="bio"
+                          onChange={handleChange}
+                          rows={3}
+                          className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-6 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none resize-none"
+                          placeholder="Brief bio about yourself..."
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="relative">
+                          <Briefcase className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/40" size={18} />
+                          <input
+                            name="expertise"
+                            type="text"
+                            onChange={handleChange}
+                            className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-6 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
+                            placeholder="Area of Expertise"
+                          />
+                        </div>
+
+                        <div className="relative">
+                          <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/40" size={18} />
+                          <input
+                            name="availability"
+                            type="text"
+                            onChange={handleChange}
+                            className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-6 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
+                            placeholder="Availability (e.g., Mon-Fri 9-5)"
+                          />
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
                 <Button
                   type="submit"
-                  disabled={loading}
-                  className="w-full h-16 rounded-2xl text-lg font-bold shadow-xl shadow-primary/20 group"
+                  disabled={loading || !isPasswordValid || !!emailError}
+                  className="w-full h-16 rounded-2xl text-lg font-bold shadow-xl shadow-primary/20 group disabled:opacity-50"
                 >
                   {loading ? (
                     <div className="w-6 h-6 border-3 border-white/30 border-t-white rounded-full animate-spin" />
@@ -197,6 +398,35 @@ export default function Register() {
                   )}
                 </Button>
               </form>
+
+              {/* Divider */}
+              <div className="flex items-center gap-4">
+                <div className="flex-1 h-px bg-white/10" />
+                <span className="text-xs text-muted-foreground uppercase tracking-wider">or continue with</span>
+                <div className="flex-1 h-px bg-white/10" />
+              </div>
+
+              {/* Google OAuth */}
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full h-14 rounded-2xl border-white/10 hover:bg-white/5"
+                onClick={async () => {
+                  try {
+                    await signInWithGoogle();
+                  } catch (err: any) {
+                    setError(err.message || 'Google sign-in failed');
+                  }
+                }}
+              >
+                <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24">
+                  <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                  <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                  <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                  <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                Sign up with Google
+              </Button>
 
               <div className="text-center">
                 <p className="text-muted-foreground text-sm font-medium">
@@ -213,4 +443,3 @@ export default function Register() {
     </div>
   );
 }
-
