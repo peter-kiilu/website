@@ -49,7 +49,17 @@ export const api = {
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.detail || "Registration failed");
+      // Handle FastAPI validation error format
+      let errorMessage = 'Registration failed';
+      if (errorData.detail) {
+        if (typeof errorData.detail === 'string') {
+          errorMessage = errorData.detail;
+        } else if (Array.isArray(errorData.detail)) {
+          // Pydantic validation errors come as array
+          errorMessage = errorData.detail.map((e: any) => e.msg || e.message).join(', ');
+        }
+      }
+      throw new Error(errorMessage);
     }
 
     return response.json();

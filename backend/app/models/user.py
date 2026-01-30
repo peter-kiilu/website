@@ -38,11 +38,15 @@ class UserCreate(UserBase):
     @classmethod
     def validate_email_domain(cls, v, info):
         role = info.data.get('role', 'student')
+        email_lower = v.lower()
+        is_ac_ke = email_lower.endswith('.ac.ke')
+        is_gmail = '@gmail.com' in email_lower
+        
         if role == 'student':
-            if not v.endswith('.ac.ke'):
+            if not is_ac_ke:
                 raise ValueError('Students must use a valid school email ending with .ac.ke')
         elif role in ['mentor', 'staff']:
-            if not (v.endswith('.ac.ke') or v.endswith('@gmail.com')):
+            if not (is_ac_ke or is_gmail):
                 raise ValueError('Mentors/Staff must use a .ac.ke or @gmail.com email')
         return v
 
