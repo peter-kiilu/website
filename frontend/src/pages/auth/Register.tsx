@@ -37,25 +37,31 @@ export default function Register() {
   const passwordStrength = Object.values(passwordChecks).filter(Boolean).length;
   const isPasswordValid = passwordStrength === 5;
 
-  // Email validation based on role
-  const emailError = useMemo(() => {
-    if (!formData.email || formData.email.length < 5) return null;
+  // Email validation based on role - only validate when form is being submitted or email looks "complete"
+  const getEmailError = () => {
+    const email = formData.email.toLowerCase().trim();
     
-    // Only validate if email looks complete (has @ and something after)
-    if (!formData.email.includes('@') || formData.email.endsWith('@')) return null;
+    // Don't validate empty or incomplete emails
+    if (!email || email.length < 5 || !email.includes('@')) return null;
     
-    const isAcKeEmail = formData.email.toLowerCase().endsWith('.ac.ke');
-    const isGmailEmail = formData.email.toLowerCase().includes('@gmail.com');
+    // Check if email ends with valid domain
+    const isAcKe = email.endsWith('.ac.ke');
+    const isGmail = email.endsWith('@gmail.com');
     
-    if (formData.role === 'student' && !isAcKeEmail) {
-      return 'Students must use email ending with .ac.ke';
+    if (formData.role === 'student') {
+      if (!isAcKe) return 'Students must use email ending with .ac.ke';
+    } else {
+      // Mentor or staff - accept .ac.ke OR gmail.com
+      if (!isAcKe && !isGmail) return 'Use .ac.ke or @gmail.com email';
     }
-    if ((formData.role === 'mentor' || formData.role === 'staff') && !isAcKeEmail && !isGmailEmail) {
-      return 'Use .ac.ke or @gmail.com email';
-    }
+    
     return null;
-  }, [formData.email, formData.role]);
+  };
+  
+  const emailError = useMemo(() => getEmailError(), [formData.email, formData.role]);
 
+  // Form is valid when password is valid AND (no email error OR email is empty - will be caught on submit)
+  const isFormValid = isPasswordValid && !emailError;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -286,17 +292,19 @@ export default function Register() {
 
                 {/* Academic Section */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="relative">
-                    <Hash className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/40" size={18} />
-                    <input
-                      name="student_id"
-                      type="text"
-                      required
-                      onChange={handleChange}
-                      className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-6 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
-                      placeholder={formData.role === 'student' ? 'Registration No' : 'Staff ID'}
-                    />
-                  </div>
+                  {formData.role === 'student' && (
+                    <div className="relative">
+                      <Hash className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/40" size={18} />
+                      <input
+                        name="student_id"
+                        type="text"
+                        required
+                        onChange={handleChange}
+                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-6 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
+                        placeholder="Registration No"
+                      />
+                    </div>
+                  )}
 
                   <div className="relative">
                     <Book className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/40" size={18} />
@@ -385,7 +393,7 @@ export default function Register() {
 
                 <Button
                   type="submit"
-                  disabled={loading || !isPasswordValid || !!emailError}
+                  disabled={loading || !isFormValid}
                   className="w-full h-16 rounded-2xl text-lg font-bold shadow-xl shadow-primary/20 group disabled:opacity-50"
                 >
                   {loading ? (

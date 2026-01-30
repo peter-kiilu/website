@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, field_validator
+from pydantic import BaseModel, EmailStr, field_validator, model_validator
 from typing import Optional, Literal
 from datetime import datetime
 import uuid
@@ -7,7 +7,7 @@ import re
 class UserBase(BaseModel):
     email: EmailStr
     full_name: str
-    student_id: str
+    student_id: Optional[str] = None  # Optional - only required for students
     department: str
     points: int = 0
     role: Literal['student', 'mentor', 'staff'] = 'student'
@@ -34,21 +34,23 @@ class UserCreate(UserBase):
             raise ValueError('Password must contain at least one special character')
         return v
 
-    @field_validator('email')
-    @classmethod
-    def validate_email_domain(cls, v, info):
-        role = info.data.get('role', 'student')
-        email_lower = v.lower()
+    @model_validator(mode='after')
+    def validate_email_by_role(self):
+        """Validate email domain based on role - runs after all fields are parsed"""
+        email_lower = self.email.lower()
         is_ac_ke = email_lower.endswith('.ac.ke')
         is_gmail = '@gmail.com' in email_lower
         
-        if role == 'student':
+        if self.role == 'student':
             if not is_ac_ke:
                 raise ValueError('Students must use a valid school email ending with .ac.ke')
-        elif role in ['mentor', 'staff']:
+            # Student ID is required for students
+            if not self.student_id:
+                raise ValueError('Student ID is required for students')
+        elif self.role in ['mentor', 'staff']:
             if not (is_ac_ke or is_gmail):
                 raise ValueError('Mentors/Staff must use a .ac.ke or @gmail.com email')
-        return v
+        return self
 
 class UserLogin(BaseModel):
     email: EmailStr

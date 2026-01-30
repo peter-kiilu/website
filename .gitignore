@@ -1,3 +1,6 @@
+# Root env file
+.env
+
 # Frontend
 frontend/node_modules/
 frontend/dist/
