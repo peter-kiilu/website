@@ -13,6 +13,11 @@ export interface User {
   department?: string;
   points: number;
   joined_at: string;
+  role: 'student' | 'mentor' | 'staff';
+  bio?: string;
+  expertise?: string;
+  availability?: string;
+  is_verified: boolean;
 }
 
 export interface UserCreate {
@@ -21,6 +26,10 @@ export interface UserCreate {
   full_name: string;
   student_id: string;
   department: string;
+  role: 'student' | 'mentor' | 'staff';
+  bio?: string;
+  expertise?: string;
+  availability?: string;
 }
 
 export interface UserLogin {

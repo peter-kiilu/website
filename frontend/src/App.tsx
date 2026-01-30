@@ -13,6 +13,7 @@ import ActivityDetail from './pages/ActivityDetail';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import ActivitiesAdmin from './pages/admin/ActivitiesAdmin';
+import Mentors from './pages/Mentors';
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/admin/activities" element={<ActivitiesAdmin />} />
+            <Route path="/mentors" element={<Mentors />} />
           </Routes>
         </main>
         <Footer />
