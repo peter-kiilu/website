@@ -6,3 +6,4 @@ supabase
 python-multipart
 email-validator
 pydantic-settings
+gunicorn
