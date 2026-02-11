@@ -128,7 +128,7 @@ const Home = () => {
       <section className="py-20 border-y border-white/5 bg-white/2">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            {[["500+", "Active Members"], ["50+", "Tech Projects"], ["20+", "University Chapters"], ["100+", "Workshops"]].map(([stat, label]) => (
+            {[["100+", "Active Members"], ["8+", "Tech Projects"], ["2+", "University Chapters"], ["15+", "Workshops"]].map(([stat, label]) => (
               <div key={label} className="space-y-2">
                 <h4 className="text-4xl font-bold font-display text-primary">{stat}</h4>
                 <p className="text-muted-foreground font-medium uppercase tracking-wider text-xs">{label}</p>
