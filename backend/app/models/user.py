@@ -9,6 +9,7 @@ class UserBase(BaseModel):
     full_name: str
     student_id: Optional[str] = None  # Optional - only required for students
     department: str
+    year_of_study: Optional[str] = '1'
     points: int = 0
     role: Literal['student', 'mentor', 'staff'] = 'student'
     bio: Optional[str] = None

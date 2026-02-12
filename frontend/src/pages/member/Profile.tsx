@@ -129,7 +129,7 @@ const Profile = () => {
                 <div className="space-y-8 flex-grow">
                   <div className="space-y-2 text-center md:text-left">
                     <h2 className="text-4xl font-display font-bold leading-tight">{memberData.full_name}</h2>
-                    <p className="text-xl text-muted-foreground">{memberData.department} • Year 3</p>
+                    <p className="text-xl text-muted-foreground">{memberData.department} • {memberData.year_of_study ? `Year ${memberData.year_of_study}` : 'Member'}</p>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
