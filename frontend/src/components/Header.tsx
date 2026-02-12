@@ -4,12 +4,13 @@ import { Menu, X, User, LogOut } from 'lucide-react';
 import { Button } from './ui/Button';
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
+import { supabase } from '../lib/supabase';
 
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(localStorage.getItem('user_email'));
   const location = useLocation();
-  const userEmail = localStorage.getItem('user_email');
 
   useEffect(() => {
     const handleScroll = () => {
@@ -17,6 +18,20 @@ export default function Header() {
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Sync auth state
+  useEffect(() => {
+    setUserEmail(localStorage.getItem('user_email'));
+
+    // Also listen for Supabase auth changes directly if configured
+    // This provides faster UI updates than waiting for App.tsx to sync local storage
+    if (supabase) {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        setUserEmail(session?.user?.email || null);
+      });
+      return () => subscription.unsubscribe();
+    }
   }, []);
 
   const navLinks = [
@@ -27,9 +42,17 @@ export default function Header() {
     { name: 'Contact', href: '/contact' },
   ];
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      if (supabase) {
+        await supabase.auth.signOut();
+      }
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
     localStorage.removeItem('user_email');
     localStorage.removeItem('access_token');
+    setUserEmail(null);
     window.location.href = '/login';
   };
 
