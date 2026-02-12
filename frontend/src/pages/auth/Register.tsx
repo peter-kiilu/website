@@ -1,7 +1,7 @@
-import { useState, useMemo } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useState, useMemo, useEffect } from 'react';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { api } from '../../lib/api';
-import { signInWithGoogle } from '../../lib/supabase';
+import { signInWithGoogle, supabase } from '../../lib/supabase';
 import { User, Mail, Lock, Hash, Book, ArrowRight, UserPlus, Sparkles, GraduationCap, Briefcase, Check, X, Eye, EyeOff, FileText, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../../components/ui/Button';
@@ -9,9 +9,14 @@ import { Button } from '../../components/ui/Button';
 
 export default function Register() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const isCompleteProfile = searchParams.get('mode') === 'complete_profile';
+  const prefillEmail = searchParams.get('email') || '';
+
   const [formData, setFormData] = useState({
     full_name: '',
-    email: '',
+    email: prefillEmail,
     password: '',
     student_id: '',
     department: 'Computer Science',
@@ -25,6 +30,21 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
+  // Fetch user details from Supabase if completing profile
+  useEffect(() => {
+    if (isCompleteProfile && supabase) {
+      supabase.auth.getUser().then(({ data: { user } }) => {
+        if (user) {
+           setFormData(prev => ({
+             ...prev,
+             email: user.email || prev.email,
+             full_name: user.user_metadata?.full_name || user.user_metadata?.name || prev.full_name
+           }));
+        }
+      });
+    }
+  }, [isCompleteProfile]);
+
   // Password strength validation
   const passwordChecks = useMemo(() => ({
     length: formData.password.length >= 8,
@@ -35,7 +55,8 @@ export default function Register() {
   }), [formData.password]);
 
   const passwordStrength = Object.values(passwordChecks).filter(Boolean).length;
-  const isPasswordValid = passwordStrength === 5;
+  // If completing profile (Google Auth), password is not required from user
+  const isPasswordValid = isCompleteProfile || passwordStrength === 5;
 
   // Email validation based on role - only validate when form is being submitted or email looks "complete"
   const getEmailError = () => {
@@ -80,7 +101,14 @@ export default function Register() {
     setLoading(true);
 
     try {
-      const user = await api.register(formData);
+      // If completing profile, generate a random secure password since backend requires it
+      // The user will login via Google anyway
+      const submissionData = { ...formData };
+      if (isCompleteProfile) {
+        submissionData.password = Math.random().toString(36).slice(-8) + 'A1!'; // Simple random password
+      }
+
+      const user = await api.register(submissionData);
       console.log("Registered:", user);
       localStorage.setItem('user_email', user.email);
       navigate('/profile'); 
@@ -157,8 +185,12 @@ export default function Register() {
 
             <div className="space-y-8">
               <div className="space-y-2">
-                <h2 className="text-3xl font-display font-bold">Create Account</h2>
-                <p className="text-muted-foreground">Join our ecosystem of innovators</p>
+                <h2 className="text-3xl font-display font-bold">
+                  {isCompleteProfile ? 'Complete Profile' : 'Create Account'}
+                </h2>
+                <p className="text-muted-foreground">
+                  {isCompleteProfile ? 'Please provide a few more details' : 'Join our ecosystem of innovators'}
+                </p>
               </div>
 
               {/* Role Selection */}
@@ -221,14 +253,15 @@ export default function Register() {
                     )}
                   </div>
 
-                  {/* Password with strength indicator */}
+                  {/* Password with strength indicator - Only show if not completing profile via Google */}
+                  {!isCompleteProfile && (
                   <div className="space-y-3">
                     <div className="relative">
                       <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/40" size={18} />
                       <input
                         name="password"
                         type={showPassword ? 'text' : 'password'}
-                        required
+                        required={!isCompleteProfile}
                         onChange={handleChange}
                         className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-12 focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none"
                         placeholder="Create Password"
@@ -286,6 +319,7 @@ export default function Register() {
                       )}
                     </AnimatePresence>
                   </div>
+                  )}
                 </div>
 
                 <div className="h-px bg-white/5" />
@@ -418,8 +452,10 @@ export default function Register() {
               <Button
                 type="button"
                 variant="outline"
-                className="w-full h-14 rounded-2xl border-white/10 hover:bg-white/5"
+                disabled={isCompleteProfile}
+                className={`w-full h-14 rounded-2xl border-white/10 hover:bg-white/5 ${isCompleteProfile ? 'opacity-50 cursor-not-allowed' : ''}`}
                 onClick={async () => {
+                  if (isCompleteProfile) return;
                   try {
                     await signInWithGoogle();
                   } catch (err: any) {

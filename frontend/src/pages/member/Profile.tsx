@@ -40,8 +40,14 @@ const Profile = () => {
         const data = await api.getMe(email);
         setMemberData(data);
       } catch (err: any) {
+        console.error("Profile load error:", err);
+        // If 404 and we have a session, it means the user is authenticated but not in our DB
+        // Redirect to complete profile
+        if ((err.message?.includes('404') || err.message?.includes('not found')) && email) {
+           navigate(`/register?mode=complete_profile&email=${encodeURIComponent(email)}`);
+           return;
+        }
         setError(err.message || 'Failed to load profile');
-        console.error(err);
       } finally {
         setLoading(false);
       }
