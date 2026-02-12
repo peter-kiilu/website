@@ -14,7 +14,7 @@ def register_user(user: UserCreate, supabase: Client = Depends(get_supabase_clie
     
     # Always remove new fields that may not exist in the database yet
     # Once you add these columns to your DB, you can remove this block
-    new_fields_to_remove = ['role', 'bio', 'expertise', 'availability', 'is_verified', 'year_of_study']
+    new_fields_to_remove = ['role', 'bio', 'expertise', 'availability', 'is_verified']
     for field in new_fields_to_remove:
         user_data.pop(field, None)
     

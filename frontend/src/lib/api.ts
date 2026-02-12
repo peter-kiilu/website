@@ -11,6 +11,7 @@ export interface User {
   full_name: string;
   student_id?: string;
   department?: string;
+  year_of_study?: string;
   points: number;
   joined_at: string;
   role: 'student' | 'mentor' | 'staff';
@@ -26,6 +27,7 @@ export interface UserCreate {
   full_name: string;
   student_id: string;
   department: string;
+  year_of_study: string;
   role: 'student' | 'mentor' | 'staff';
   bio?: string;
   expertise?: string;
