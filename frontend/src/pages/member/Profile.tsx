@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { User as UserIcon, Mail, Award, Calendar, LogOut, Shield, Zap, Target, Star, ArrowRight } from 'lucide-react';
 import { api, User } from '../../lib/api';
+import { supabase } from '../../lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '../../components/ui/Button';
@@ -19,7 +20,17 @@ const Profile = () => {
 
   useEffect(() => {
     const fetchProfile = async () => {
-      const email = localStorage.getItem('user_email');
+      let email = localStorage.getItem('user_email');
+      
+      // If no email in local storage, check Supabase session directly
+      if (!email && supabase) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user?.email) {
+          email = session.user.email;
+          localStorage.setItem('user_email', email);
+        }
+      }
+
       if (!email) {
         navigate('/login');
         return;

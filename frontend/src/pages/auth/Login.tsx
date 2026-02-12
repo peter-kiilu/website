@@ -171,7 +171,12 @@ export default function Login() {
                   try {
                     await signInWithGoogle();
                   } catch (err: any) {
-                    setError(err.message || 'Google sign-in failed');
+                    console.error("Google sign in error:", err);
+                    if (err.message?.includes('configuration')) {
+                      setError('System configuration error: Google Sign-in not setup completely.');
+                    } else {
+                      setError(err.message || 'Google sign-in failed. Please try again.');
+                    }
                   }
                 }}
               >
